@@ -1,17 +1,22 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTA Retro</title>
+    <title>GTA Lite</title>
     <style>
         :root {
-            --primary: #ffcc00;
+            --primary: #00b7ff;
             --secondary: #ff3300;
             --dark: #111111;
             --darker: #000000;
             --light: #ffffff;
             --road: #333333;
+            --gta-blue: #0066cc;
+            --gta-green: #00cc66;
+            --gta-purple: #9933cc;
+            --gta-pink: #ff66cc;
+            --gta-yellow: #ffcc00;
         }
         
         * {
@@ -46,6 +51,18 @@
             text-shadow: 3px 3px 0 var(--secondary);
             font-size: 2.5rem;
             text-align: center;
+        }
+        
+        .info-box {
+            background-color: var(--dark);
+            border: 2px solid var(--gta-yellow);
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            color: var(--light);
+            font-size: 0.9rem;
+            overflow: hidden;
         }
         
         .score-container {
@@ -83,6 +100,60 @@
             border-radius: 10px;
             position: relative;
             overflow: hidden;
+            background-image: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(50, 50, 50, 0.5) 50px,
+                    rgba(50, 50, 50, 0.5) 52px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(50, 50, 50, 0.5) 50px,
+                    rgba(50, 50, 50, 0.5) 52px
+                );
+        }
+        
+        .building {
+            position: absolute;
+            background-color: var(--gta-blue);
+            border: 1px solid black;
+            z-index: 2;
+        }
+        
+        .road {
+            position: absolute;
+            background-color: var(--road);
+            z-index: 1;
+        }
+        
+        .road.horizontal {
+            height: 40px;
+            width: 100%;
+        }
+        
+        .road.vertical {
+            width: 40px;
+            height: 100%;
+        }
+        
+        .road-line {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 2;
+        }
+        
+        .road-line.horizontal {
+            height: 2px;
+            width: 20px;
+        }
+        
+        .road-line.vertical {
+            width: 2px;
+            height: 20px;
         }
         
         .controls {
@@ -270,6 +341,20 @@
             display: none;
         }
         
+        .certificate-box {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: var(--gta-yellow);
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            font-size: 1rem;
+            font-weight: bold;
+            z-index: 15;
+        }
+        
         @media (max-width: 768px) {
             .controls {
                 grid-template-columns: 1fr;
@@ -303,34 +388,38 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>GTA RETRO</h1>
+        <h1>GTA LITE</h1>
+        <div class="info-box">
+            <marquee scrollamount="5">Rockstar Games presents GTA Lite - a retro style game with old school graphics. Drive around the city, avoid cops, collect money and try to survive!</marquee>
+        </div>
         <div class="score-container">
             <div class="score-box">
-                <span class="label">PONTSZÁM</span>
+                <span class="label">SCORE</span>
                 <span id="score">0</span>
             </div>
             <div class="score-box">
-                <span class="label">ÉLETEK</span>
+                <span class="label">LIVES</span>
                 <span id="lives">3</span>
             </div>
             <div class="score-box">
-                <span class="label">SZINT</span>
+                <span class="label">LEVEL</span>
                 <span id="level">1</span>
             </div>
             <div class="score-box">
-                <span class="label">REKORD</span>
+                <span class="label">HIGH SCORE</span>
                 <span id="highscore">0</span>
             </div>
         </div>
 
         <div class="game-area" id="gameArea">
             <div id="message" class="message"></div>
+            <div class="certificate-box">ca: xxxxxxxxxxxxxxxxxxxxxxxxxxx</div>
         </div>
 
         <div class="controls">
             <div class="game-buttons">
-                <button id="startBtn" class="primary-btn">INDÍTÁS</button>
-                <button id="resetBtn" class="secondary-btn">ÚJRAINDÍTÁS</button>
+                <button id="startBtn" class="primary-btn">START</button>
+                <button id="resetBtn" class="secondary-btn">RESTART</button>
             </div>
             <div class="touch-controls">
                 <div class="dpad">
@@ -340,16 +429,16 @@
                     <button id="downBtn" class="direction-btn down">↓</button>
                 </div>
                 <div class="action-buttons">
-                    <button id="honkBtn" class="action-btn">DUDA</button>
-                    <button id="boostBtn" class="action-btn">TURBÓ</button>
+                    <button id="honkBtn" class="action-btn">HONK</button>
+                    <button id="boostBtn" class="action-btn">BOOST</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // DOM elemek
+    <script>        
+document.addEventListener('DOMContentLoaded', () => {
+            // DOM elements
             const gameArea = document.getElementById('gameArea');
             const scoreEl = document.getElementById('score');
             const livesEl = document.getElementById('lives');
@@ -359,7 +448,7 @@
             const resetBtn = document.getElementById('resetBtn');
             const messageEl = document.getElementById('message');
             
-            // Irányítógombok
+            // Control buttons
             const upBtn = document.getElementById('upBtn');
             const downBtn = document.getElementById('downBtn');
             const leftBtn = document.getElementById('leftBtn');
@@ -367,11 +456,11 @@
             const honkBtn = document.getElementById('honkBtn');
             const boostBtn = document.getElementById('boostBtn');
             
-            // Játék állapot
+            // Game state
             let score = 0;
             let lives = 3;
             let level = 1;
-            let highscore = localStorage.getItem('gtaRetroHighscore') || 0;
+            let highscore = localStorage.getItem('gtaLiteHighscore') || 0;
             let player = null;
             let isGameRunning = false;
             let gameInterval = null;
@@ -385,10 +474,10 @@
                 right: false
             };
             
-            // Rekord megjelenítése
+            // Display high score
             highscoreEl.textContent = highscore;
             
-            // Konfiguráció
+            // Configuration
             const config = {
                 playerSpeed: 5,
                 enemySpeed: 2,
@@ -398,12 +487,12 @@
                 boostDuration: 2000
             };
             
-            // Játékterület méretének frissítése
+            // Update game area dimensions
             function updateDimensions() {
                 config.boardWidth = gameArea.clientWidth;
                 config.boardHeight = gameArea.clientHeight;
                 
-                // Ha játékban vagyunk, akkor ellenőrizzük a játékos pozícióját
+                // If player exists, check position
                 if (player) {
                     const x = parseInt(player.style.left);
                     const y = parseInt(player.style.top);
@@ -417,7 +506,7 @@
                 }
             }
             
-            // Üzenet megjelenítése
+            // Show message
             function showMessage(text, duration = 2000) {
                 messageEl.textContent = text;
                 messageEl.style.display = 'block';
@@ -427,7 +516,7 @@
                 }, duration);
             }
             
-            // Játékos létrehozása
+            // Create player
             function createPlayer() {
                 player = document.createElement('div');
                 player.className = 'player';
@@ -436,7 +525,7 @@
                 gameArea.appendChild(player);
             }
             
-            // Autó létrehozása
+            // Create car
             function createCar() {
                 if (!isGameRunning) return;
                 
@@ -445,27 +534,27 @@
                 const type = types[Math.floor(Math.random() * types.length)];
                 car.className = `car ${type}`;
                 
-                // Véletlen pozíció a képernyő szélén
+                // Random position on screen edge
                 let x, y, direction;
-                const side = Math.floor(Math.random() * 4); // 0: fent, 1: jobb, 2: lent, 3: bal
+                const side = Math.floor(Math.random() * 4); // 0: top, 1: right, 2: bottom, 3: left
                 
                 switch (side) {
-                    case 0: // Fent
+                    case 0: // Top
                         x = Math.random() * (config.boardWidth - 50);
                         y = -50;
                         direction = 'down';
                         break;
-                    case 1: // Jobb
+                    case 1: // Right
                         x = config.boardWidth;
                         y = Math.random() * (config.boardHeight - 50);
                         direction = 'left';
                         break;
-                    case 2: // Lent
+                    case 2: // Bottom
                         x = Math.random() * (config.boardWidth - 50);
                         y = config.boardHeight;
                         direction = 'up';
                         break;
-                    case 3: // Bal
+                    case 3: // Left
                         x = -50;
                         y = Math.random() * (config.boardHeight - 50);
                         direction = 'right';
@@ -476,17 +565,17 @@
                 car.style.top = `${y}px`;
                 gameArea.appendChild(car);
                 
-                // Autó típusa szerinti sebesség
+                // Speed based on car type
                 let speed;
                 switch (type) {
                     case 'police':
-                        speed = config.enemySpeed * 1.5; // Rendőr: gyors
+                        speed = config.enemySpeed * 1.5; // Police: fast
                         break;
                     case 'taxi':
-                        speed = config.enemySpeed; // Taxi: átlagos
+                        speed = config.enemySpeed; // Taxi: average
                         break;
                     case 'truck':
-                        speed = config.enemySpeed * 0.7; // Teherautó: lassú
+                        speed = config.enemySpeed * 0.7; // Truck: slow
                         break;
                     default:
                         speed = config.enemySpeed;
@@ -497,12 +586,12 @@
                     x: x,
                     y: y,
                     direction: direction,
-                    speed: speed + (level * 0.2), // Nehezedik a játék a szintekkel
+                    speed: speed + (level * 0.2), // Game gets harder with levels
                     type: type
                 });
             }
             
-            // Érme létrehozása
+            // Create coin
             function createCoin() {
                 if (!isGameRunning) return;
                 
@@ -523,38 +612,75 @@
                 });
             }
             
-            // Játékciklus
+            // Game loop
             function gameLoop() {
-                // Játékos mozgatása
+                // Move player
                 movePlayer();
                 
-                // Autók mozgatása
+                // Move cars
                 moveCars();
                 
-                // Érme összegyűjtés ellenőrzése
+                // Check coin collection
                 checkCoinCollection();
                 
-                // Ütközés ellenőrzése
+                // Check collisions
                 checkCollisions();
             }
             
-            // Játékos mozgatása
+            // Check if point is on a road
+            function isOnRoad(x, y) {
+                // Road positions
+                const horizontalRoadPositions = [
+                    Math.floor(config.boardHeight * 0.25),
+                    Math.floor(config.boardHeight * 0.5),
+                    Math.floor(config.boardHeight * 0.75)
+                ];
+                
+                const verticalRoadPositions = [
+                    Math.floor(config.boardWidth * 0.25),
+                    Math.floor(config.boardWidth * 0.5),
+                    Math.floor(config.boardWidth * 0.75)
+                ];
+                
+                // Check horizontal roads (with padding)
+                for (const roadY of horizontalRoadPositions) {
+                    if (y > roadY - 40 && y < roadY + 40) {
+                        return true;
+                    }
+                }
+                
+                // Check vertical roads (with padding)
+                for (const roadX of verticalRoadPositions) {
+                    if (x > roadX - 40 && x < roadX + 40) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            // Move player
             function movePlayer() {
                 if (!player) return;
                 
                 let x = parseInt(player.style.left);
                 let y = parseInt(player.style.top);
+                let newX = x;
+                let newY = y;
                 
-                if (keyStates.up && y > 0) y -= config.playerSpeed;
-                if (keyStates.down && y < config.boardHeight - 50) y += config.playerSpeed;
-                if (keyStates.left && x > 0) x -= config.playerSpeed;
-                if (keyStates.right && x < config.boardWidth - 50) x += config.playerSpeed;
+                if (keyStates.up && y > 0) newY -= config.playerSpeed;
+                if (keyStates.down && y < config.boardHeight - 50) newY += config.playerSpeed;
+                if (keyStates.left && x > 0) newX -= config.playerSpeed;
+                if (keyStates.right && x < config.boardWidth - 50) newX += config.playerSpeed;
                 
-                player.style.left = `${x}px`;
-                player.style.top = `${y}px`;
+                // Only update position if new position is on a road
+                if (isOnRoad(newX + 25, newY + 25)) {
+                    player.style.left = `${newX}px`;
+                    player.style.top = `${newY}px`;
+                }
             }
             
-            // Autók mozgatása
+            // Move cars
             function moveCars() {
                 for (let i = cars.length - 1; i >= 0; i--) {
                     const car = cars[i];
@@ -577,7 +703,7 @@
                     car.element.style.left = `${car.x}px`;
                     car.element.style.top = `${car.y}px`;
                     
-                    // Pályán kívül kerülés ellenőrzése
+                    // Check if car is out of bounds
                     if (car.x < -100 || car.x > config.boardWidth + 100 ||
                         car.y < -100 || car.y > config.boardHeight + 100) {
                         car.element.remove();
@@ -586,7 +712,7 @@
                 }
             }
             
-            // Érme gyűjtés ellenőrzése
+            // Check coin collection
             function checkCoinCollection() {
                 if (!player) return;
                 
@@ -601,32 +727,32 @@
                         playerY < coin.y + 30 &&
                         playerY + 50 > coin.y) {
                         
-                        // Érme gyűjtés
+                        // Collect coin
                         coin.element.remove();
                         coins.splice(i, 1);
                         
-                        // Pontszám növelése
+                        // Increase score
                         score += 10;
                         scoreEl.textContent = score;
                         
-                        // Szintlépés ellenőrzése
+                        // Check for level up
                         if (score >= level * 100) {
                             level++;
                             levelEl.textContent = level;
                             
-                            // Nehézség növelése
+                            // Increase difficulty
                             config.enemySpeed += 0.2;
                             
-                            showMessage(`SZINT ${level}!`);
+                            showMessage(`LEVEL ${level}!`);
                         }
                         
-                        // Új érme létrehozása
+                        // Create new coin
                         setTimeout(createCoin, 1000);
                     }
                 }
             }
             
-            // Ütközés ellenőrzése
+            // Check collisions
             function checkCollisions() {
                 if (!player) return;
                 
@@ -639,25 +765,25 @@
                         playerY < car.y + 40 &&
                         playerY + 40 > car.y) {
                         
-                        // Ütközés történt
+                        // Collision occurred
                         lives--;
                         livesEl.textContent = lives;
                         
-                        // Játékos újrahelyezése
+                        // Reposition player
                         player.style.left = `${(config.boardWidth - 50) / 2}px`;
                         player.style.top = `${config.boardHeight - 100}px`;
                         
-                        // Vizuális visszajelzés
+                        // Visual feedback
                         player.style.opacity = '0.5';
                         setTimeout(() => {
                             player.style.opacity = '1';
                         }, 1000);
                         
-                        // Játék vége ellenőrzése
+                        // Check game over
                         if (lives <= 0) {
                             endGame();
                         } else {
-                            showMessage(`Ütközés! Még ${lives} életed maradt`);
+                            showMessage(`Collision! ${lives} lives left`);
                         }
                         
                         break;
@@ -665,14 +791,14 @@
                 }
             }
             
-            // Dudálás funkció
+            // Honk function
             function performHonk() {
                 if (!isGameRunning || !player) return;
                 
                 const playerX = parseInt(player.style.left) + 25;
                 const playerY = parseInt(player.style.top) + 25;
                 
-                // Vizuális visszajelzés
+                // Visual effect
                 const honkEffect = document.createElement('div');
                 honkEffect.style.position = 'absolute';
                 honkEffect.style.left = `${playerX}px`;
@@ -685,7 +811,7 @@
                 honkEffect.style.zIndex = '12';
                 gameArea.appendChild(honkEffect);
                 
-                // Eltűntetés animáció
+                // Fade animation
                 let opacity = 0.3;
                 const fadeInterval = setInterval(() => {
                     opacity -= 0.05;
@@ -697,7 +823,7 @@
                     }
                 }, 50);
                 
-                // Közeli autók eltolása
+                // Push nearby cars
                 for (const car of cars) {
                     const carCenterX = car.x + 25;
                     const carCenterY = car.y + 25;
@@ -707,11 +833,11 @@
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     
                     if (distance < config.honkRadius) {
-                        // Eltolás iránya
+                        // Push direction
                         const pushX = (dx / distance) * 50;
                         const pushY = (dy / distance) * 50;
                         
-                        // Autó eltolása
+                        // Push car
                         car.x += pushX;
                         car.y += pushY;
                         car.element.style.left = `${car.x}px`;
@@ -719,35 +845,35 @@
                     }
                 }
                 
-                showMessage('DUDA!', 500);
+                showMessage('HONK!', 500);
             }
             
-            // Turbo / gyorsítás funkció
+            // Boost function
             function performBoost() {
                 if (!isGameRunning) return;
                 
-                // Sebesség növelése
+                // Increase speed
                 const originalSpeed = config.playerSpeed;
                 config.playerSpeed = 10;
                 
-                // Vizuális visszajelzés
+                // Visual feedback
                 player.style.boxShadow = '0 0 15px rgba(255, 50, 0, 0.8)';
                 
-                // Visszaállítás időzítő
+                // Reset timer
                 setTimeout(() => {
                     config.playerSpeed = originalSpeed;
                     player.style.boxShadow = 'none';
                 }, config.boostDuration);
                 
-                showMessage('TURBÓ!', 500);
+                showMessage('BOOST!', 500);
             }
             
-            // Játék indítása
+            // Start game
             function startGame() {
-                // Ellenőrizzük, hogy fut-e már a játék
+                // Check if game is already running
                 if (isGameRunning) return;
                 
-                // Játék állapot alaphelyzetbe
+                // Reset game state
                 score = 0;
                 lives = 3;
                 level = 1;
@@ -756,37 +882,49 @@
                 levelEl.textContent = level;
                 isGameRunning = true;
                 
-                // Játékterület tisztítása
+                // Clear game area
                 gameArea.innerHTML = '';
-                gameArea.appendChild(messageEl); // Üzenet elem megtartása
+                
+                // Reinstall message and certificate elements
+                gameArea.appendChild(messageEl); // Keep message element
+                
+                // Add certificate box
+                const certificateBox = document.createElement('div');
+                certificateBox.className = 'certificate-box';
+                certificateBox.textContent = 'ca: xxxxxxxxxxxxxxxxxxxxxxxxxxx';
+                gameArea.appendChild(certificateBox);
+                
                 cars = [];
                 coins = [];
                 
-                // Méretek frissítése
+                // Update dimensions
                 updateDimensions();
                 
-                // Játékos létrehozása
+                // Create environment
+                createGameEnvironment();
+                
+                // Create player
                 createPlayer();
                 
-                // Kezdeti érmék
+                // Initial coins
                 for (let i = 0; i < 5; i++) {
                     createCoin();
                 }
                 
-                // Időzített autó generálás
+                // Timed car generation
                 carSpawnInterval = setInterval(() => {
                     if (cars.length < 8 + level) {
                         createCar();
                     }
                 }, 2000);
                 
-                // Játékciklus indítása
+                // Start game loop
                 gameInterval = setInterval(gameLoop, 16);
                 
-                showMessage('Játék indítása!', 1000);
+                showMessage('Game Started!', 1000);
             }
             
-            // Játék újraindítása
+            // Restart game
             function resetGame() {
                 if (gameInterval) clearInterval(gameInterval);
                 if (carSpawnInterval) clearInterval(carSpawnInterval);
@@ -794,28 +932,28 @@
                 startGame();
             }
             
-            // Játék befejezése
+            // End game
             function endGame() {
                 isGameRunning = false;
                 clearInterval(gameInterval);
                 clearInterval(carSpawnInterval);
                 
-                // Rekord ellenőrzése
+                // Check high score
                 if (score > highscore) {
                     highscore = score;
-                    localStorage.setItem('gtaRetroHighscore', highscore);
+                    localStorage.setItem('gtaLiteHighscore', highscore);
                     highscoreEl.textContent = highscore;
                 }
                 
-                showMessage(`JÁTÉK VÉGE! Pontszám: ${score}`, 3000);
+                showMessage(`GAME OVER! Score: ${score}`, 3000);
                 
-                // Autók megállítása
+                // Stop cars
                 cars.forEach(car => {
                     car.speed = 0;
                 });
             }
             
-            // Billentyűzet események
+            // Keyboard events
             document.addEventListener('keydown', (e) => {
                 switch (e.key) {
                     case 'ArrowUp':
@@ -864,7 +1002,7 @@
                 }
             });
             
-            // Érintőképernyő gombok
+            // Touch screen buttons
             upBtn.addEventListener('mousedown', () => keyStates.up = true);
             upBtn.addEventListener('mouseup', () => keyStates.up = false);
             upBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keyStates.up = true; });
@@ -885,21 +1023,137 @@
             rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keyStates.right = true; });
             rightBtn.addEventListener('touchend', () => keyStates.right = false);
             
-            // Akciógombok
+            // Action buttons
             honkBtn.addEventListener('click', performHonk);
             boostBtn.addEventListener('click', performBoost);
             
-            // Gomb események
+            // Button events
             startBtn.addEventListener('click', startGame);
             resetBtn.addEventListener('click', resetGame);
             
-            // Ablak átméretezés figyelése
+            // Window resize event
             window.addEventListener('resize', updateDimensions);
             
-            // Kezdeti méretek beállítása
+            // Initial dimensions
             updateDimensions();
             
-            // Játék indítása gomb kijelölése
+            // Create game environment
+            function createGameEnvironment() {
+                // Create roads
+                createRoads();
+                
+                // Create buildings
+                createBuildings();
+            }
+            
+            // Create roads
+            function createRoads() {
+                // Horizontal roads
+                const horizontalRoadPositions = [
+                    Math.floor(config.boardHeight * 0.25),
+                    Math.floor(config.boardHeight * 0.5),
+                    Math.floor(config.boardHeight * 0.75)
+                ];
+                
+                horizontalRoadPositions.forEach(y => {
+                    const road = document.createElement('div');
+                    road.className = 'road horizontal';
+                    road.style.top = `${y - 20}px`;
+                    gameArea.appendChild(road);
+                    
+                    // Road markings
+                    for (let x = 10; x < config.boardWidth; x += 60) {
+                        const line = document.createElement('div');
+                        line.className = 'road-line horizontal';
+                        line.style.top = `${y - 1}px`;
+                        line.style.left = `${x}px`;
+                        gameArea.appendChild(line);
+                    }
+                });
+                
+                // Vertical roads
+                const verticalRoadPositions = [
+                    Math.floor(config.boardWidth * 0.25),
+                    Math.floor(config.boardWidth * 0.5),
+                    Math.floor(config.boardWidth * 0.75)
+                ];
+                
+                verticalRoadPositions.forEach(x => {
+                    const road = document.createElement('div');
+                    road.className = 'road vertical';
+                    road.style.left = `${x - 20}px`;
+                    gameArea.appendChild(road);
+                    
+                    // Road markings
+                    for (let y = 10; y < config.boardHeight; y += 60) {
+                        const line = document.createElement('div');
+                        line.className = 'road-line vertical';
+                        line.style.left = `${x - 1}px`;
+                        line.style.top = `${y}px`;
+                        gameArea.appendChild(line);
+                    }
+                });
+            }
+            
+            // Create buildings
+            function createBuildings() {
+                const buildingColors = [
+                    'var(--gta-blue)',
+                    'var(--gta-green)',
+                    'var(--gta-purple)',
+                    'var(--gta-pink)',
+                    'var(--gta-yellow)'
+                ];
+                
+                // Building placement zones (areas between roads)
+                const zones = [
+                    { x1: 0, y1: 0, x2: config.boardWidth * 0.25 - 40, y2: config.boardHeight * 0.25 - 40 },
+                    { x1: config.boardWidth * 0.25 + 40, y1: 0, x2: config.boardWidth * 0.5 - 40, y2: config.boardHeight * 0.25 - 40 },
+                    { x1: config.boardWidth * 0.5 + 40, y1: 0, x2: config.boardWidth * 0.75 - 40, y2: config.boardHeight * 0.25 - 40 },
+                    { x1: config.boardWidth * 0.75 + 40, y1: 0, x2: config.boardWidth, y2: config.boardHeight * 0.25 - 40 },
+                    
+                    { x1: 0, y1: config.boardHeight * 0.25 + 40, x2: config.boardWidth * 0.25 - 40, y2: config.boardHeight * 0.5 - 40 },
+                    { x1: config.boardWidth * 0.25 + 40, y1: config.boardHeight * 0.25 + 40, x2: config.boardWidth * 0.5 - 40, y2: config.boardHeight * 0.5 - 40 },
+                    { x1: config.boardWidth * 0.5 + 40, y1: config.boardHeight * 0.25 + 40, x2: config.boardWidth * 0.75 - 40, y2: config.boardHeight * 0.5 - 40 },
+                    { x1: config.boardWidth * 0.75 + 40, y1: config.boardHeight * 0.25 + 40, x2: config.boardWidth, y2: config.boardHeight * 0.5 - 40 },
+                    
+                    { x1: 0, y1: config.boardHeight * 0.5 + 40, x2: config.boardWidth * 0.25 - 40, y2: config.boardHeight * 0.75 - 40 },
+                    { x1: config.boardWidth * 0.25 + 40, y1: config.boardHeight * 0.5 + 40, x2: config.boardWidth * 0.5 - 40, y2: config.boardHeight * 0.75 - 40 },
+                    { x1: config.boardWidth * 0.5 + 40, y1: config.boardHeight * 0.5 + 40, x2: config.boardWidth * 0.75 - 40, y2: config.boardHeight * 0.75 - 40 },
+                    { x1: config.boardWidth * 0.75 + 40, y1: config.boardHeight * 0.5 + 40, x2: config.boardWidth, y2: config.boardHeight * 0.75 - 40 },
+                    
+                    { x1: 0, y1: config.boardHeight * 0.75 + 40, x2: config.boardWidth * 0.25 - 40, y2: config.boardHeight },
+                    { x1: config.boardWidth * 0.25 + 40, y1: config.boardHeight * 0.75 + 40, x2: config.boardWidth * 0.5 - 40, y2: config.boardHeight },
+                    { x1: config.boardWidth * 0.5 + 40, y1: config.boardHeight * 0.75 + 40, x2: config.boardWidth * 0.75 - 40, y2: config.boardHeight },
+                    { x1: config.boardWidth * 0.75 + 40, y1: config.boardHeight * 0.75 + 40, x2: config.boardWidth, y2: config.boardHeight }
+                ];
+                
+                // 1-2 buildings per zone
+                zones.forEach(zone => {
+                    const buildingCount = 1 + Math.floor(Math.random() * 2); // 1-2 buildings per zone
+                    
+                    for (let i = 0; i < buildingCount; i++) {
+                        const width = 30 + Math.floor(Math.random() * 40);
+                        const height = 30 + Math.floor(Math.random() * 40);
+                        
+                        // Building position within zone
+                        const x = zone.x1 + Math.floor(Math.random() * (zone.x2 - zone.x1 - width));
+                        const y = zone.y1 + Math.floor(Math.random() * (zone.y2 - zone.y1 - height));
+                        
+                        // Create building
+                        const building = document.createElement('div');
+                        building.className = 'building';
+                        building.style.width = `${width}px`;
+                        building.style.height = `${height}px`;
+                        building.style.left = `${x}px`;
+                        building.style.top = `${y}px`;
+                        building.style.backgroundColor = buildingColors[Math.floor(Math.random() * buildingColors.length)];
+                        gameArea.appendChild(building);
+                    }
+                });
+            }
+            
+            // Focus start button
             startBtn.focus();
         });
     </script>
